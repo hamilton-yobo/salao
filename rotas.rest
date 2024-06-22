@@ -1,0 +1,44 @@
+GET http://localhost:3000/
+
+
+###
+GET http://localhost:3000/Clientes
+
+
+###
+GET http://localhost:3000/Clientes/667754b7c7ced4849875ee43
+
+
+###
+POST http://localhost:3000/Clientes
+Content-Type: application/json
+
+{
+    "nome":"Elton",
+    "sobrenome":"Kamuango",
+    "genero": "M",
+    "dataNascimento": "25-04-1999",
+    "email": "elton@email.com",
+    "telefone": "944320877",
+    "imagem": "aaa"
+}
+
+
+###
+DELETE http://localhost:3000/Clientes/667754b7c7ced4849875ee43
+
+
+
+###
+PATCH http://localhost:3000/Clientes/66775ae9f95483b4111710ae
+Content-Type: application/json
+
+{
+    "nome":"DAISEN",
+    "sobrenome":"Kamuango",
+    "genero": "M",
+    "dataNascimento": "25-04-1999",
+    "email": "elton@email.com",
+    "telefone": "944320877",
+    "imagem": "aaa"
+}
