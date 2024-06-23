@@ -1,5 +1,5 @@
 const express = require("express");
-const clienteRouter = require("./routes/clientes");
+const usuariosRouter = require("./routes/usuarios");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 
@@ -18,7 +18,7 @@ db.once("open", () => {
 });
 app.use(express.json());
 
-app.use("/clientes", clienteRouter);
+app.use("/usuarios", usuariosRouter);
 app.get("/", function (req, res) {
   res.status(200).json({ msg: "Seja benvindo ao servidor do Salão" });
 });

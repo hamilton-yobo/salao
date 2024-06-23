@@ -1,23 +1,23 @@
 const express = require("express");
-const Cliente = require("./../models/Cliente");
+const Usuario = require("./../models/Usuario");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const clientes = await Cliente.find();
-    res.status(200).json(clientes);
+    const usuarios = await Usuario.find();
+    res.status(200).json(usuarios);
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 });
 
-router.get("/:id", getCliente, (req, res) => {
-  res.status(200).json(res.cliente.nome);
+router.get("/:id", getUsuario, (req, res) => {
+  res.status(200).json(res.usuario);
 });
 
 router.post("/", async (req, res) => {
   const data = req.body;
-  const cliente = new Cliente({
+  const usuario = new Usuario({
     nome: req.body.nome,
     sobrenome: req.body.sobrenome,
     genero: req.body.genero,
@@ -25,53 +25,55 @@ router.post("/", async (req, res) => {
     email: req.body.email,
     telefone: req.body.telefone,
     imagem: req.body.imagem,
+    senha: req.body.senha,
+    role: req.body.role,
   });
 
   try {
-    const existeCliente = await Cliente.findOne({ email: cliente.email });
-    if (existeCliente != null) {
+    const existeUsuario = await Usuario.findOne({ email: usuario.email });
+    if (existeUsuario != null) {
       res.status(400).json({ msg: "O email inserido não está disponível" });
     } else {
-      const novoCliente = await cliente.save();
-      res.status(201).json(novoCliente);
+      const novoUsuario = await usuario.save();
+      res.status(201).json(novoUsuario);
     }
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 });
 
-router.patch("/:id", getCliente, async (req, res) => {
+router.patch("/:id", getUsuario, async (req, res) => {
   if (req.body.nome != null) {
-    res.cliente.nome = req.body.nome;
+    res.usuario.nome = req.body.nome;
   }
   try {
-    const clienteActualizado = await res.cliente.save();
-    res.status(200).json(clienteActualizado);
+    const usuarioActualizado = await res.usuario.save();
+    res.status(200).json(usuarioActualizado);
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 });
 
-router.delete("/:id", getCliente, async (req, res) => {
+router.delete("/:id", getUsuario, async (req, res) => {
   try {
-    await Cliente.findByIdAndDelete(res.cliente.id);
+    await Usuario.findByIdAndDelete(res.usuario.id);
     res.status(200).json({ msg: "Eliminado!" });
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 });
 
-async function getCliente(req, res, next) {
-  let cliente;
+async function getUsuario(req, res, next) {
+  let usuario;
   try {
-    cliente = await Cliente.findById(req.params.id);
-    if (cliente == null) {
-      return res.status(404).json({ msg: "Cliente não encontrado" });
+    usuario = await Usuario.findById(req.params.id);
+    if (usuario == null) {
+      return res.status(404).json({ msg: "Usuário não encontrado" });
     }
   } catch (err) {
     return res.status(500).json({ msg: err.message });
   }
-  res.cliente = cliente;
+  res.usuario = usuario;
   next();
 }
 
