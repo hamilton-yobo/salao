@@ -1,47 +1,54 @@
-GET http://localhost:3000/
 
+## ROTAS PARA SALÃO
 
-###
-GET http://localhost:3000/Usuarios
+### Listar todos salões
+GET http://localhost:3000/Salao
 
+### Ver um salão
+GET http://localhost:3000/Salao/id
 
-###
-GET http://localhost:3000/Usuarios/667754b7c7ced4849875ee43
-
-
-###
-POST http://localhost:3000/Usuarios
+### Criar salão
+POST http://localhost:3000/Salao
 Content-Type: application/json
 
 {
-    "nome":"Elton",
-    "sobrenome":"Kamuango",
-    "genero": "Masculino",
-    "dataNascimento": "25-04-1999",
-    "email": "eelton1@email.com",
-    "telefone": "944320877",
-    "imagem": "aaa",
-    "senha":"123456",
-    "endereco":"",
-    "role":"CLIENTE"
+    "nome":"Salao 1",
+    "localizacao":"",
+    "horario":"",
+    "telefone":"942304521",
+    "email":"salao@gmail.com",
+    "senha":"12345",
+    "imagem":"imagem"
 }
 
+### Deletar salão
+DELETE http://localhost:3000/Salao/id
 
-###
-DELETE http://localhost:3000/Usuarios/667754b7c7ced4849875ee43
-
-
-
-###
-PATCH http://localhost:3000/Usuarios/66775ae9f95483b4111710ae
+### Atualizar salão
+PATCH http://localhost:3000/Salao/id
 Content-Type: application/json
 
 {
-    "nome":"DAISEN",
-    "sobrenome":"Kamuango",
-    "genero": "M",
-    "dataNascimento": "25-04-1999",
-    "email": "elton@email.com",
-    "telefone": "944320877",
-    "imagem": "aaa"
+    "nome":"Salao 2",
+    "localizacao":"",
+    "horario":"",
+    "telefone":"922304341",
+    "email":"salao2@gmail.com",
+    "senha":"123453",
+    "imagem":"imagem2"
+}
+
+## ROTAS PARA SERVIÇO
+
+### Criar serviço
+POST http://localhost:3000/servico
+Content-Type: application/json
+
+{
+    "salaoId":"id",
+    "colaboradorId":"id",
+    "tipo":"Corte Francês",
+    "duracao":30,
+    "valor":2000,
+    "status":"A"
 }

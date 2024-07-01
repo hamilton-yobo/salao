@@ -16,7 +16,7 @@ router.get("/:id", getUsuario, (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  const data = req.body;
+  // const data = req.body;
   const usuario = new Usuario({
     nome: req.body.nome,
     sobrenome: req.body.sobrenome,
@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
     res.status(400).json({ msg: err.message });
   }
 });
-
+/*
 router.patch("/:id", getUsuario, async (req, res) => {
   if (req.body.nome != null) {
     res.usuario.nome = req.body.nome;
@@ -51,6 +51,32 @@ router.patch("/:id", getUsuario, async (req, res) => {
     res.status(200).json(usuarioActualizado);
   } catch (err) {
     res.status(400).json({ msg: err.message });
+  }
+});
+*/
+router.patch('/:id', async (req, res) => {
+  try {
+    const usuarioId = req.params.id;
+    const {
+      nome, sobrenome, genero, dataNascimento, email, telefone, senha,
+      endereco, imagem, role
+    } = req.body;
+    
+    const usuarioActualizado = await Usuario.findByIdAndUpdate(usuarioId, {
+      nome, sobrenome, genero, dataNascimento, email, telefone, senha,
+      endereco, imagem, role
+    }, {new:true});
+
+    if (!usuarioActualizado) {
+      return res.status(404).json({ error: 'Usuário não encontrado.' });
+    }
+    /*if (!(req.body.genero == 'Masculino' || req.body.genero == 'Feminino')) {
+      return res.json({ msg: 'Género deve ser Masculino ou Feminino' })
+    }*/
+    res.status(201).json(usuarioActualizado);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Erro ao atualizar usuário.' });
   }
 });
 

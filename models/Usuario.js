@@ -1,53 +1,67 @@
-const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
-const Role = require("../enums/Role");
-const Genero = require("../enums/Genero");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const Genero = require('../enums/Genero');
+const Provincia = require('../enums/Provincia');
 
-const EnderecoSchema = new mongoose.Schema({
-  provincia: {
-    type: String,
-    required: true,
-  },
-  municipio: { type: String, required: true },
-  bairro: { type: String, required: true },
-  rua: { type: String, required: true },
-  casa: { type: String, required: true },
+const usuarioSchema = new mongoose.Schema({
+    nome: { type: String, required: [true, 'Deve preencher o campo "Nome"'] },
+    sobrenome: { 
+        type: String,
+        required: [true, 'Deve preencher o campo "Sobrenome"']
+    },
+    genero: {
+        type: String,
+        enum: [Genero],
+        required: [true, 'Deve informar o género'],
+        default: Genero.M
+    },
+    dataNascimento: { type: String, required: [true, 'Deve informe a data de nascimento'] },
+    email: { type: String, required: [true, 'Deve preencher o campo "Email"'] },
+    telefone: String,
+    senha: { type: String, required: [true, 'Deve preencher o campo "Senha"'] },
+    endereco: {
+        type: Object,
+        bairro: String,
+        provincia: {
+          type: String,
+          enum: [Provincia],
+          required: [true, "Deve informar a provincia onde reside"],
+          default: Provincia.Luanda
+        },
+    },
+    imagem: String,
+    role: {
+        type: String,
+        enum: ['ADMIN', 'CLIENTE', 'COLABORADOR'],
+        required: true,
+        default: 'CLIENTE'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+      }
 });
-const UsuarioSchema = new mongoose.Schema({
-  nome: { type: String, required: true },
-  sobrenome: { type: String, required: true },
-  genero: {
-    type: String,
-    Enumerator: Genero,
-    required: true,
-  },
-  dataNascimento: { type: String, required: true },
-  email: { type: String, required: true, unique: true, index: true },
-  telefone: { type: String, required: true },
-  endereco: { type: EnderecoSchema },
-  imagem: { type: String, required: true },
-  senha: { type: String, required: true },
-  role: {
-    type: String,
-    Enumerator: Role,
-    required: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-UsuarioSchema.pre("save", async function (next) {
+usuarioSchema.pre("save", async function (next) {
   const usuario = this;
-  if (!usuario.isModified("senha")) return next();
   try {
-    const salt = await bcrypt.genSalt();
+    const salt = await bcrypt.genSalt(12);
     usuario.senha = await bcrypt.hash(usuario.senha, salt);
   } catch (err) {
     return next(err);
   }
 });
-UsuarioSchema.methods.compareSenha = async function (senha) {
-  return bcrypt.compare(senha, this.senha);
-};
-module.exports = mongoose.model("Usuario", UsuarioSchema);
+
+usuarioSchema.pre("findOneAndUpdate", async function (next) {
+  const atualizacao = this.getUpdate();
+  if (atualizacao.senha) {
+    try {
+      const salt = await bcrypt.genSalt(12);
+      atualizacao.senha = await bcrypt.hash(atualizacao.senha, salt);
+    } catch (err) {
+      return next(err);
+    }
+  }
+  return next();
+});
+
+module.exports = mongoose.model('Usuario', usuarioSchema);

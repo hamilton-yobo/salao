@@ -1,3 +1,30 @@
+# Alterações Feitas
+
+## Modificação do endpoint de atualização do usuário.
+
+### O endpoint para atualização do usuário não estava atualizar todos campos.
+
+## Modificação do Enum . _Genero_
+
+### Ao invés das chaves _ADMIN_ e _CLIENTE_ usei _M_ e _F_ por ser mais intuitivo.
+
+## Alteração do model Usuário
+
+### Fiz outro código para model `Usuário` para analisar o código, e jeito que faço os códigos, prefiro fazer um único esquema para a `model` ao invés de fazer esquemas e incorporar noutro.
+
+## Instalação da biblioteca `morgan`
+
+### Instalei `morgan` para acompanhar os eventos das requisições no terminal.
+
+## Escrevi códigos para `Salão` e `Servico`
+
+### Escrevi o código das models `Salão`, `Servico` e as respetivas rotas, embora faltam mais rotas para `Servico`. Também criei o model de relacionamento entre `colaborador` e `salão`.
+
+## Endpoints
+
+### Ver o arquivo `rotas.rest`
+
+
 # Alterações Realizadas
 
 ## Definição dos endpoints dos clientes/colaboradores
