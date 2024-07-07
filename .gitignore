@@ -1,3 +1,5 @@
 #Ignore
 .env
 node_modules
+.gitignore
+Plano.md
