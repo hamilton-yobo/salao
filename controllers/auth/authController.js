@@ -1,9 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+const jwt = require("json-web-token");
+const crypto = require("crypto");
 const dotenv = require("dotenv").config();
 const authConfig = require("./../../config/auth.json");
 const Usuario = require("./../../models/Usuario");
+const mailer = require("../../modules/mailer");
 
 const login = async (req, res) => {
   const { email, senha } = req.body;
@@ -69,6 +71,74 @@ const logout = async (req, res) => {
   res.clearCookie("jwt", { httpOnly: true });
   res.sendStatus(204);
 };
-const reset = async (req, res) => {};
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ email });
 
-module.exports = { login, refreshToken, logout, reset };
+    if (!usuario) res.status(404).json({ msg: "Utilizador não encontrado" });
+
+    const resetToken = crypto.randomBytes(20).toString("hex");
+    const now = new Date();
+    now.setHours(now.getHours() + 2);
+    await Usuario.findByIdAndUpdate(usuario.id, {
+      $set: {
+        passwordResetToken: resetToken,
+        passwordResetExpires: now,
+      },
+    });
+    mailer.sendMail(
+      {
+        to: email,
+        from: "elton.kamuango@gmail.com",
+        subject: "Pedido de reposição de senha",
+
+        //template: "test.html",
+        html:
+          "<p>Você requisitou uma alteração de palavra-passe. Se confirma esta ação, por favor, use esse token: " +
+          resetToken +
+          "</p>", //"/auth/forgot_password",
+        context: { resetToken },
+      },
+      (err) => {
+        if (err)
+          return res.status(400).json({
+            msg: "Ocorreu um erro, tente novamente mais tarde.",
+          });
+        res.send();
+      }
+    );
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ msg: "Ocorreu um erro, tente novamente mais tarde." });
+  }
+};
+const resetPassword = async (req, res, next) => {
+  const { email, token, senha } = req.body;
+  try {
+    const usuario = await Usuario.findOne({ email }).select(
+      "+passwordResetToken passwordResetExpires"
+    );
+
+    if (!usuario) res.status(404).json({ msg: "Utilizador não encontrado" });
+
+    if (token !== usuario.passwordResetToken)
+      res.status(400).json({ msg: "O token fornecido é inválido" });
+    const now = new Date();
+    if (now > usuario.passwordResetExpires)
+      res
+        .status(400)
+        .json({ msg: "O token fornecido está expirado, gere um novo!" });
+
+    usuario.senha = senha;
+    await usuario.save();
+    res.send();
+  } catch (err) {
+    return res
+      .status(400)
+      .json({ msg: "Ocorreu um erro, tente novamente mais tarde." });
+  }
+};
+
+module.exports = { login, refreshToken, logout, forgotPassword, resetPassword };
