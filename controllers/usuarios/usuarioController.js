@@ -1,10 +1,10 @@
-const express = require("express");
-const bcrypt = require("bcrypt");
+// const express = require("express");
+// const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const dotenv = require("dotenv").config();
-const authConfig = require("./../../config/auth.json");
+require("dotenv").config();
+// const authConfig = require("./../../config/auth.json");
 const Usuario = require("./../../models/Usuario");
-const router = express.Router();
+// const router = express.Router();
 
 const getUsuario = async (req, res) => {
   try {
@@ -29,7 +29,6 @@ const getUsuarioById = async (req, res) => {
 };
 
 const createUsuario = async (req, res) => {
-  // const data = req.body;
   const usuario = new Usuario({
     nome: req.body.nome,
     sobrenome: req.body.sobrenome,
