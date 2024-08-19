@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const Genero = require("../enums/Genero");
 const Provincia = require("../enums/Provincia");
+const Role = require("../enums/Role");
 
 const usuarioSchema = new mongoose.Schema({
   nome: { type: String, required: [true, 'Deve preencher o campo "Nome"'] },
@@ -12,7 +13,7 @@ const usuarioSchema = new mongoose.Schema({
   genero: {
     type: String,
     enum: [Genero],
-    required: [true, "Deve informar o género"],
+    required: true,
     default: Genero.M,
   },
   dataNascimento: {
@@ -35,7 +36,7 @@ const usuarioSchema = new mongoose.Schema({
   imagem: String,
   role: {
     type: String,
-    enum: ["ADMIN", "CLIENTE", "COLABORADOR"],
+    enum: [Role],
     required: true,
     default: "CLIENTE",
   },

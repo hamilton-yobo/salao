@@ -4,11 +4,14 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 // const authConfig = require("./../../config/auth.json");
 const Usuario = require("./../../models/Usuario");
+const Genero = require("./../../enums/Genero");
+const Role = require("../../enums/Role");
+const mongoose = require("mongoose");
 // const router = express.Router();
 
 const getUsuario = async (req, res) => {
   try {
-    const usuarios = await Usuario.find();
+    const usuarios = await Usuario.find().select("-senha -__v");
     res.status(200).json(usuarios);
   } catch (err) {
     res.status(500).json({ msg: err.message });
@@ -18,11 +21,11 @@ const getUsuario = async (req, res) => {
 const getUsuarioById = async (req, res) => {
   let usuario;
   try {
-    usuario = await Usuario.findById(req.params.id);
+    usuario = await Usuario.findById(req.params.id).select("-senha -__v");
     if (usuario == null) {
       return res.status(404).json({ msg: "Usuário não encontrado" });
     }
-    return res.status(404).json(usuario);
+    return res.status(200).json(usuario);
   } catch (err) {
     return res.status(500).json({ msg: err.message });
   }
@@ -45,42 +48,46 @@ const createUsuario = async (req, res) => {
     const existeUsuario = await Usuario.findOne({ email: usuario.email });
     if (existeUsuario != null) {
       res.status(400).json({ msg: "O email inserido não está disponível" });
+    } else if (usuario.genero != Genero.M && usuario.genero != Genero.F) {
+        res.status(400).json({ msg: "O gênero precisa ser Masculino ou Feminino" })
+    } else if (usuario.role != Role.ADMIN && usuario.role != Role.CLIENTE && usuario.role != Role.COLABORADOR) {
+      res.status(400).json({ msg: `${usuario.role} não é um tipo de usuário correto` });
     } else {
-      const novoUsuario = await usuario.save();
 
-      const accessToken = jwt.sign(
-        { id: usuario._id },
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-          expiresIn: 30,
-        }
-      );
-      const refreshToken = jwt.sign(
-        { id: usuario._id },
-        process.env.REFRESH_TOKEN_SECRET,
-        {
-          expiresIn: 86400,
-        }
-      );
-      await Usuario.findByIdAndUpdate(novoUsuario._id, {
-        refreshToken: refreshToken,
-      });
-      novoUsuario.senha = undefined;
+        const novoUsuario = await usuario.save();
 
-      res.cookie("jwt", refreshToken, {
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000,
-      });
-      res.status(201).json({ novoUsuario, token: accessToken });
-    }
+        const accessToken = jwt.sign(
+          { id: usuario._id },
+          process.env.ACCESS_TOKEN_SECRET,
+          {
+            expiresIn: 30,
+          }
+        );
+        const refreshToken = jwt.sign(
+          { id: usuario._id },
+          process.env.REFRESH_TOKEN_SECRET,
+          {
+            expiresIn: 86400,
+          }
+        );
+        await Usuario.findByIdAndUpdate(novoUsuario._id, {
+          refreshToken: refreshToken,
+        });
+        novoUsuario.senha = undefined;
+
+        res.cookie("jwt", refreshToken, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000,
+        });
+        res.status(201).json({ novoUsuario, token: accessToken });
+      } 
   } catch (err) {
     res.status(400).json({ msg: err.message });
   }
 };
 
 const updateUsuario = async (req, res) => {
-  try {
-    const usuarioId = req.params.id;
+  const usuarioId = req.params.id;
     const {
       nome,
       sobrenome,
@@ -93,6 +100,20 @@ const updateUsuario = async (req, res) => {
       imagem,
       role,
     } = req.body;
+
+  try {
+    const existeOutroUsuario = await Usuario.findOne({email}).select("_id"); // Verifica se o email informado já está cadastrado no banco de dados e retorna o ID do respetivo usuário caso encontre.
+    const passedId = await Usuario.findById(usuarioId).select("_id");
+    
+    if (existeOutroUsuario !== passedId && existeOutroUsuario) { // Verifica se o ID encontrado é do usuário que está tentando atualizar os dados
+      // Se entrar nesse bloco quer dizer que o usuário forneceu email que pertence a outro usuário
+      res.status(400).json({ msg: "o email indicado não está disponível" });
+      return
+    }
+    if (genero != Genero.M && genero != Genero.F) {
+        res.status(400).json({ msg: "O gênero precisa ser Masculino ou Feminino" })
+      return
+    }
 
     const usuarioActualizado = await Usuario.findByIdAndUpdate(
       usuarioId,
